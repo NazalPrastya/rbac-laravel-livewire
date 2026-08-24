@@ -16,6 +16,13 @@
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
+
+                <flux:sidebar.item icon="calendar" href="#">Calendar</flux:sidebar.item>
+            <flux:sidebar.group expandable heading="Favorites" class="grid">
+                <flux:sidebar.item href="#">Marketing site</flux:sidebar.item>
+                <flux:sidebar.item href="#">Android app</flux:sidebar.item>
+                <flux:sidebar.item href="#">Brand guidelines</flux:sidebar.item>
+            </flux:sidebar.group>
             </flux:sidebar.nav>
 
             <flux:spacer />
