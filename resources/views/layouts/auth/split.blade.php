@@ -14,7 +14,7 @@
                     />
                 </div>
 
-                <a href="{{ route('home') }}" class="relative z-20 flex items-center text-lg font-bold text-black" wire:navigate>
+                <a href="{{ route('home') }}" class="relative z-20 flex items-center text-lg font-extrabold text-accent" wire:navigate>
                     <span class="flex h-10 w-10 items-center justify-center rounded-md">
                         <x-app-logo-icon class="w-28" />
                     </span>
