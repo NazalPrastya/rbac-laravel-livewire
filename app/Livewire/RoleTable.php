@@ -69,6 +69,11 @@ final class RoleTable extends PowerGridComponent
     public function actions(Role $row): array
     {
         return [
+            Button::add('privilege')
+                ->slot('<iconify-icon icon="solar:key-bold" class="size-4" aria-hidden="true"></iconify-icon>')
+                ->id()
+                ->class('inline-flex size-9 items-center justify-center rounded-lg bg-green-500   hover:bg-emerald-600')
+                ->dispatch('role-privilege-edit', ['rowId' => $row->id]),
             Button::add('edit')
                 ->slot('<iconify-icon icon="lucide:pencil" class="size-4" aria-hidden="true"></iconify-icon>')
                 ->id()

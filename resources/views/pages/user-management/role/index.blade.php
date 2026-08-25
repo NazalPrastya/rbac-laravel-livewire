@@ -10,5 +10,7 @@
         <div class="w-full">
             <livewire:role-table />
         </div>
+
+        <livewire:privilege-form />
     </div>
 </x-layouts::app>
