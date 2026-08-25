@@ -17,11 +17,21 @@
                     </flux:sidebar.item>
                 </flux:sidebar.group>
 
-                <flux:sidebar.item icon="calendar" href="#">Calendar</flux:sidebar.item>
-            <flux:sidebar.group expandable heading="Favorites" class="grid">
-                <flux:sidebar.item href="#">Marketing site</flux:sidebar.item>
-                <flux:sidebar.item href="#">Android app</flux:sidebar.item>
-                <flux:sidebar.item href="#">Brand guidelines</flux:sidebar.item>
+            <flux:sidebar.group expandable heading="Master Data" class="grid">
+                <x-slot:icon>
+                    <iconify-icon icon="tdesign:data" class="size-4" aria-hidden="true"></iconify-icon>
+                </x-slot:icon>
+
+                <flux:sidebar.item href="#">Enumeration</flux:sidebar.item>
+            </flux:sidebar.group>
+            <flux:sidebar.group expandable="false" heading="User Management" class="grid">
+                <x-slot:icon>
+                    <iconify-icon icon="mage:users-fill" class="size-4" aria-hidden="true"></iconify-icon>
+                </x-slot:icon>
+
+                <flux:sidebar.item href="/dashboard/user-management/user">User</flux:sidebar.item>
+                <flux:sidebar.item href="/dashboard/user-management/role">Role</flux:sidebar.item>
+                <flux:sidebar.item href="/dashboard/user-management/menu">Menu</flux:sidebar.item>
             </flux:sidebar.group>
             </flux:sidebar.nav>
 

@@ -16,7 +16,8 @@
         "laravel/tinker": "^3.0",
         "livewire/blaze": "^1.0",
         "livewire/flux": "*",
-        "livewire/livewire": "^4.1"
+        "livewire/livewire": "^4.1",
+        "power-components/livewire-powergrid": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.24",
