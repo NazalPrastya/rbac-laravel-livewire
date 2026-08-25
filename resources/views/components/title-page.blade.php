@@ -4,8 +4,8 @@
 ])
 
 <div class="flex flex-col ">
-    <h1 class="text-xl lg:text-2xl xl:text-3xl font-bold">{{ $title }}</h1>
+    <flux:heading class="text-xl lg:text-2xl xl:text-3xl font-bold">{{ $title }}</flux:heading>
     @if ($subtitle)
-    <h2 class="text-muted">{{ $subtitle }}</h2>
+    <flux:text class="text-muted">{{ $subtitle }}</flux:text>
     @endif
 </div>
