@@ -19,6 +19,8 @@ final class MenuTable extends PowerGridComponent
     public function setUp(): array
     {
         return [
+            PowerGrid::header()->showSearchInput(),
+
             PowerGrid::footer()
                 ->showPerPage(15, [10, 15, 25, 50, 100])
                 ->showRecordCount(),

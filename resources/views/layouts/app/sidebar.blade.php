@@ -30,7 +30,7 @@
                 </x-slot:icon>
 
                 <flux:sidebar.item href="/dashboard/user-management/user">User</flux:sidebar.item>
-                <flux:sidebar.item href="/dashboard/user-management/role">Role</flux:sidebar.item>
+                <flux:sidebar.item href="/dashboard/user-management/role">Role & Permission</flux:sidebar.item>
                 <flux:sidebar.item href="/dashboard/user-management/menu">Menu</flux:sidebar.item>
             </flux:sidebar.group>
             </flux:sidebar.nav>
