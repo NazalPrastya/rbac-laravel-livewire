@@ -1,5 +1,7 @@
 <div>
-    <flux:button wire:click="create" variant="primary" icon="plus">Tambah User</flux:button>
+    @if (auth()->user()?->hasMenuPermission('user-management.user', 'create'))
+        <flux:button wire:click="create" variant="primary" icon="plus">Tambah User</flux:button>
+    @endif
 
     <flux:modal name="user-form-modal" class="w-full max-w-xl" :closable="true">
         <form wire:submit="save" class="space-y-5">

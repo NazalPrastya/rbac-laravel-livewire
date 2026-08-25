@@ -1,12 +1,40 @@
 <?php
 
 use App\Livewire\UserForm;
+use App\Models\Menu;
+use App\Models\Privilege;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserRole;
 use Livewire\Livewire;
 
+function authenticateUserManager($test): void
+{
+    $menu = Menu::create([
+        'menu_name' => 'User Management',
+        'url' => '/dashboard/user-management/user',
+        'permission_key' => 'user-management.user',
+        'is_active' => true,
+    ]);
+    $manager = Role::create(['name' => 'User Manager']);
+    $managerUser = User::factory()->create();
+
+    UserRole::create(['user_id' => $managerUser->id, 'role_id' => $manager->id]);
+    Privilege::create([
+        'role_id' => $manager->id,
+        'menu_id' => $menu->id,
+        'can_read' => true,
+        'can_create' => true,
+        'can_update' => true,
+        'can_delete' => true,
+    ]);
+
+    $test->actingAs($managerUser);
+}
+
 test('a user can be assigned multiple roles', function () {
+    authenticateUserManager($this);
+
     $admin = Role::create(['name' => 'Admin']);
     $operator = Role::create(['name' => 'Operator']);
 
@@ -27,6 +55,8 @@ test('a user can be assigned multiple roles', function () {
 });
 
 test('updating a user replaces their assigned roles', function () {
+    authenticateUserManager($this);
+
     $admin = Role::create(['name' => 'Admin']);
     $operator = Role::create(['name' => 'Operator']);
     $user = User::factory()->create();

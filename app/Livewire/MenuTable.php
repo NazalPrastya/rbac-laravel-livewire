@@ -47,6 +47,7 @@ final class MenuTable extends PowerGridComponent
             ->add('id')
             ->add('menu_name')
             ->add('url')
+            ->add('permission_key')
             ->add('order')
             ->add('icon')
             ->add('parent_id')
@@ -83,6 +84,9 @@ final class MenuTable extends PowerGridComponent
             Column::make('URL', 'url')
                 ->sortable()
                 ->searchable(),
+            Column::make('Permission Key', 'permission_key')
+                ->sortable()
+                ->searchable(),
             Column::make('Order', 'order')->sortable(),
             Column::make('Status', 'status_display', 'is_active'),
             Column::make('Parent', 'parent_display'),
@@ -95,6 +99,7 @@ final class MenuTable extends PowerGridComponent
         return [
             Filter::inputText('menu_name')->operators(['contains']),
             Filter::inputText('url')->operators(['contains']),
+            Filter::inputText('permission_key')->operators(['contains']),
             Filter::boolean('is_active'),
         ];
     }
@@ -104,18 +109,25 @@ final class MenuTable extends PowerGridComponent
 
     public function actions(Menu $row): array
     {
-        return [
-            Button::add('edit')
+        $actions = [];
+
+        if (auth()->user()?->hasMenuPermission('user-management.menu', 'update')) {
+            $actions[] = Button::add('edit')
                 ->slot('<iconify-icon icon="lucide:pencil" class="size-4" aria-hidden="true"></iconify-icon>')
                 ->id()
                 ->class('inline-flex size-9 items-center justify-center rounded-lg bg-yellow-300 text-zinc-900 hover:bg-yellow-400')
-                ->dispatch('menu-edit', ['rowId' => $row->id]),
-            Button::add('delete')
+                ->dispatch('menu-edit', ['rowId' => $row->id]);
+        }
+
+        if (auth()->user()?->hasMenuPermission('user-management.menu', 'delete')) {
+            $actions[] = Button::add('delete')
                 ->slot('<iconify-icon icon="lucide:trash-2" class="size-4" aria-hidden="true"></iconify-icon>')
                 ->id()
                 ->class('inline-flex size-9 items-center justify-center rounded-lg bg-red-500 text-white hover:bg-red-600')
-                ->dispatch('menu-delete-request', ['rowId' => $row->id]),
-        ];
+                ->dispatch('menu-delete-request', ['rowId' => $row->id]);
+        }
+
+        return $actions;
     }
 
     /*

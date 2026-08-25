@@ -3,86 +3,104 @@
 namespace Database\Seeders;
 
 use App\Models\Menu;
+use App\Models\Privilege;
+use App\Models\Role;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\UserRole;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        DB::transaction(function (): void {
+            $admin = User::withTrashed()->firstOrNew(['email' => 'testing@gmail.com']);
+            $admin->fill([
+                'name' => 'Super Admin',
+                'phone' => '08123456789',
+                'password' => Hash::make('password'),
+            ]);
+            $admin->save();
+            $admin->restore();
 
-        // User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+            $superAdmin = Role::withTrashed()->firstOrNew(['name' => 'Super Admin']);
+            $superAdmin->desc = 'Memiliki akses penuh ke seluruh menu dan fitur aplikasi.';
+            $superAdmin->save();
+            $superAdmin->restore();
 
-        User::create([
-            'name' => 'Testing',
-            'phone' => '08123456789',
-            'email' => 'testing@gmail.com',
-            'password' => bcrypt('password')
-        ]);
+            $dashboard = $this->upsertMenu('Dashboard', [
+                'url' => '/dashboard',
+                'permission_key' => 'dashboard',
+                'order' => 0,
+                'icon' => 'material-symbols:dashboard',
+                'parent_id' => null,
+                'is_active' => true,
+            ]);
+            $userManagement = $this->upsertMenu('User Management', [
+                'url' => '#',
+                'permission_key' => 'user-management',
+                'order' => 1,
+                'icon' => 'mage:users-fill',
+                'parent_id' => null,
+                'is_active' => true,
+            ]);
+            $user = $this->upsertMenu('User', [
+                'url' => '/dashboard/user-management/user',
+                'permission_key' => 'user-management.user',
+                'order' => 1,
+                'icon' => 'lucide:users',
+                'parent_id' => $userManagement->id,
+                'is_active' => true,
+            ]);
+            $role = $this->upsertMenu('Role & Permission', [
+                'url' => '/dashboard/user-management/role',
+                'permission_key' => 'user-management.role',
+                'order' => 2,
+                'icon' => 'lucide:shield-check',
+                'parent_id' => $userManagement->id,
+                'is_active' => true,
+            ]);
+            $menu = $this->upsertMenu('Menu', [
+                'url' => '/dashboard/user-management/menu',
+                'permission_key' => 'user-management.menu',
+                'order' => 3,
+                'icon' => 'lucide:menu',
+                'parent_id' => $userManagement->id,
+                'is_active' => true,
+            ]);
 
-        Menu::create([
-            'menu_name' => 'Dashboard',
-            'url' => '/dashboard',
-            'order' => 0,
-            'icon' => 'material-symbols:dashboard',
-            'is_active' => true
-        ]);
+            UserRole::firstOrCreate([
+                'user_id' => $admin->id,
+                'role_id' => $superAdmin->id,
+            ]);
 
-        $masterData = Menu::create([
-            'menu_name' => 'Master Data',
-            'url' => '#',
-            'order' => 1,
-            'icon' => 'tdesign:data',
-            'is_active' => true
-        ]);
-        
-        Menu::create([
-            'menu_name' => 'Enumeration',
-            'url' => '/dashboard/enumeration',
-            'order' => 1,
-            'is_active' => true,
-            'parent_id' => $masterData->id
-        ]);
+            collect([$dashboard, $userManagement, $user, $role, $menu])->each(function (Menu $menu) use ($superAdmin, $admin): void {
+                $privilege = Privilege::withTrashed()->firstOrNew([
+                    'role_id' => $superAdmin->id,
+                    'menu_id' => $menu->id,
+                ]);
+                $privilege->fill([
+                    'can_read' => true,
+                    'can_create' => true,
+                    'can_update' => true,
+                    'can_delete' => true,
+                    'created_by' => $privilege->created_by ?? $admin->id,
+                    'updated_by' => $admin->id,
+                ]);
+                $privilege->save();
+                $privilege->restore();
+            });
+        });
+    }
 
-        $userManagement = Menu::create([
-            'menu_name' => 'User Management',
-            'url' => '#',
-            'order' => 2,
-            'icon' => 'mage:users-fill',
-            'is_active' => true
-        ]);
-
-        Menu::create([
-            'menu_name' => 'User',
-            'url' => '/dashboard/user-management/user',
-            'order' => 1,
-            'is_active' => true,
-            'parent_id' => $userManagement->id
-        ]);
-
-        Menu::create([
-            'menu_name' => 'Role',
-            'url' => '/dashboard/user-management/role',
-            'order' => 2,
-            'is_active' => true,
-            'parent_id' => $userManagement->id
-        ]);
-        Menu::create([
-            'menu_name' => 'Menu',
-            'url' => '/dashboard/user-management/menu',
-            'order' => 3,
-            'is_active' => true,
-            'parent_id' => $masterData->id
-        ]);
+    /** @param array<string, mixed> $attributes */
+    private function upsertMenu(string $name, array $attributes): Menu
+    {
+        return Menu::query()->updateOrCreate(['menu_name' => $name], $attributes);
     }
 }

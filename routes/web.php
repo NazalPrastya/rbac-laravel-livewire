@@ -11,15 +11,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard
     Route::group(['prefix' => 'dashboard'], function () {
-        Route::view('/', 'dashboard')->name('dashboard');
-        
+        Route::view('/', 'dashboard')->middleware('menu.permission:dashboard')->name('dashboard');
+
         // User Management
         Route::group(['prefix' => 'user-management'], function () {
-            Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
-            
-            Route::get('/role', [RoleController::class, 'index'])->name('role.index');
+            Route::get('/menu', [MenuController::class, 'index'])->middleware('menu.permission:user-management.menu')->name('menu.index');
 
-            Route::get('/user', [UserController::class, 'index'])->name('user.index');
+            Route::get('/role', [RoleController::class, 'index'])->middleware('menu.permission:user-management.role')->name('role.index');
+
+            Route::get('/user', [UserController::class, 'index'])->middleware('menu.permission:user-management.user')->name('user.index');
         });
     });
 });

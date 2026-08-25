@@ -78,17 +78,24 @@ final class UserTable extends PowerGridComponent
 
     public function actions(User $row): array
     {
-        return [
-            Button::add('edit')
+        $actions = [];
+
+        if (auth()->user()?->hasMenuPermission('user-management.user', 'update')) {
+            $actions[] = Button::add('edit')
                 ->slot('<iconify-icon icon="lucide:pencil" class="size-4" aria-hidden="true"></iconify-icon>')
                 ->id()
                 ->class('inline-flex size-9 items-center justify-center rounded-lg bg-yellow-300 text-zinc-900 hover:bg-yellow-400')
-                ->dispatch('user-edit', ['rowId' => $row->id]),
-            Button::add('delete')
+                ->dispatch('user-edit', ['rowId' => $row->id]);
+        }
+
+        if (auth()->user()?->hasMenuPermission('user-management.user', 'delete')) {
+            $actions[] = Button::add('delete')
                 ->slot('<iconify-icon icon="lucide:trash-2" class="size-4" aria-hidden="true"></iconify-icon>')
                 ->id()
                 ->class('inline-flex size-9 items-center justify-center rounded-lg bg-red-500 text-white hover:bg-red-600')
-                ->dispatch('user-delete-request', ['rowId' => $row->id]),
-        ];
+                ->dispatch('user-delete-request', ['rowId' => $row->id]);
+        }
+
+        return $actions;
     }
 }

@@ -1,7 +1,9 @@
 <div>
-    <flux:button wire:click="create" variant="primary" icon="plus">
-        Tambah Menu
-    </flux:button>
+    @if (auth()->user()?->hasMenuPermission('user-management.menu', 'create'))
+        <flux:button wire:click="create" variant="primary" icon="plus">
+            Tambah Menu
+        </flux:button>
+    @endif
 
     <flux:modal name="menu-form-modal" class="w-full max-w-xl" :closable="true">
         <form wire:submit="save" class="space-y-5">
@@ -14,7 +16,10 @@
 
             <flux:input wire:model="menuName" label="Nama menu" autofocus />
 
-            <flux:input wire:model="url" label="URL" placeholder="/dashboard/example atau # untuk parent" />
+            <div class="grid gap-5 sm:grid-cols-2">
+                <flux:input wire:model="url" label="URL" placeholder="/dashboard/example atau # untuk parent" />
+                <flux:input wire:model="permissionKey" label="Permission key" placeholder="user-management.user" />
+            </div>
 
             <div class="grid gap-5 sm:grid-cols-2">
                 <flux:select wire:model="parentId" label="Parent menu">

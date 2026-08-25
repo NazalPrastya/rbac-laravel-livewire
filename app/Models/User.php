@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 /**
@@ -65,5 +66,56 @@ class User extends Authenticatable
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'user_roles');
+    }
+
+    public function hasMenuPermission(Menu|string|int $menu, string $ability = 'read'): bool
+    {
+        $column = 'can_'.str_replace('can_', '', $ability);
+
+        if (! in_array($column, ['can_read', 'can_create', 'can_update', 'can_delete'], true)) {
+            return false;
+        }
+
+        $menuId = match (true) {
+            $menu instanceof Menu => $menu->id,
+            is_int($menu) => $menu,
+            default => Menu::query()
+                ->where('permission_key', $menu)
+                ->where('is_active', true)
+                ->value('id'),
+        };
+
+        if (! $menuId || ! Menu::query()->whereKey($menuId)->where('is_active', true)->exists()) {
+            return false;
+        }
+
+        return Privilege::query()
+            ->where('menu_id', $menuId)
+            ->whereIn('role_id', $this->roles()->select('roles.id'))
+            ->where($column, true)
+            ->exists();
+    }
+
+    /** @return Collection<int, Menu> */
+    public function accessibleMenus(): Collection
+    {
+        $menuIds = Privilege::query()
+            ->whereIn('role_id', $this->roles()->select('roles.id'))
+            ->where('can_read', true)
+            ->pluck('menu_id')
+            ->unique();
+
+        $parentIds = Menu::query()
+            ->whereIn('id', $menuIds)
+            ->whereNotNull('parent_id')
+            ->pluck('parent_id');
+
+        return Menu::query()
+            ->where('is_active', true)
+            ->whereIn('id', $menuIds->merge($parentIds)->unique())
+            ->orderByRaw('CASE WHEN parent_id IS NULL THEN id ELSE parent_id END')
+            ->orderByRaw('CASE WHEN parent_id IS NULL THEN 0 ELSE 1 END')
+            ->orderBy('order')
+            ->get();
     }
 }

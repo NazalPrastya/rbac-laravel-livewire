@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Concerns\AuthorizesMenuPermission;
 use App\Models\Menu;
 use App\Models\Privilege;
 use App\Models\Role;
@@ -11,6 +12,10 @@ use Livewire\Component;
 
 final class PrivilegeForm extends Component
 {
+    use AuthorizesMenuPermission;
+
+    private const PERMISSION_KEY = 'user-management.role';
+
     public ?string $roleId = null;
 
     public string $roleName = '';
@@ -21,6 +26,7 @@ final class PrivilegeForm extends Component
     #[On('role-privilege-edit')]
     public function edit(string $rowId): void
     {
+        $this->authorizeMenuPermission(self::PERMISSION_KEY, 'update');
         $role = Role::findOrFail($rowId);
         $privileges = Privilege::query()
             ->where('role_id', $role->id)
@@ -45,6 +51,7 @@ final class PrivilegeForm extends Component
 
     public function save(): void
     {
+        $this->authorizeMenuPermission(self::PERMISSION_KEY, 'update');
         $role = Role::findOrFail($this->roleId);
         $menuIds = Menu::query()->pluck('id');
 

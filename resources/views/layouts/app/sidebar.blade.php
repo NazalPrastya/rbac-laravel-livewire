@@ -10,29 +10,44 @@
                 <flux:sidebar.collapse class="lg:hidden" />
             </flux:sidebar.header>
 
+            @php
+                $menus = auth()->user()->accessibleMenus();
+                $currentPath = request()->path();
+            @endphp
+
             <flux:sidebar.nav>
-                <flux:sidebar.group :heading="__('Platform')" class="grid">
-                    <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
-                        {{ __('Dashboard') }}
-                    </flux:sidebar.item>
-                </flux:sidebar.group>
+                @foreach ($menus->whereNull('parent_id') as $menu)
+                    @php($children = $menus->where('parent_id', $menu->id))
 
-            <flux:sidebar.group expandable heading="Master Data" class="grid">
-                <x-slot:icon>
-                    <iconify-icon icon="tdesign:data" class="size-4" aria-hidden="true"></iconify-icon>
-                </x-slot:icon>
+                    @if ($children->isNotEmpty())
+                        <flux:sidebar.group expandable heading="{{ $menu->menu_name }}" class="grid">
+                            <x-slot:icon>
+                                <iconify-icon icon="{{ $menu->icon ?: 'lucide:folder' }}" class="size-4" aria-hidden="true"></iconify-icon>
+                            </x-slot:icon>
 
-                <flux:sidebar.item href="#">Enumeration</flux:sidebar.item>
-            </flux:sidebar.group>
-            <flux:sidebar.group expandable="false" heading="User Management" class="grid">
-                <x-slot:icon>
-                    <iconify-icon icon="mage:users-fill" class="size-4" aria-hidden="true"></iconify-icon>
-                </x-slot:icon>
-
-                <flux:sidebar.item href="/dashboard/user-management/user">User</flux:sidebar.item>
-                <flux:sidebar.item href="/dashboard/user-management/role">Role & Permission</flux:sidebar.item>
-                <flux:sidebar.item href="/dashboard/user-management/menu">Menu</flux:sidebar.item>
-            </flux:sidebar.group>
+                            @foreach ($children as $child)
+                                <flux:sidebar.item
+                                    href="{{ $child->url }}"
+                                    :current="$currentPath === ltrim($child->url, '/')"
+                                    wire:navigate
+                                >
+                                    {{ $child->menu_name }}
+                                </flux:sidebar.item>
+                            @endforeach
+                        </flux:sidebar.group>
+                    @else
+                        <flux:sidebar.item
+                            href="{{ $menu->url }}"
+                            :current="$currentPath === ltrim($menu->url, '/')"
+                            wire:navigate
+                        >
+                            <x-slot:icon>
+                                <iconify-icon icon="{{ $menu->icon ?: 'lucide:circle' }}" class="size-4" aria-hidden="true"></iconify-icon>
+                            </x-slot:icon>
+                            {{ $menu->menu_name }}
+                        </flux:sidebar.item>
+                    @endif
+                @endforeach
             </flux:sidebar.nav>
 
             <flux:spacer />

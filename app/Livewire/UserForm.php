@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Concerns\AuthorizesMenuPermission;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserRole;
@@ -12,6 +13,10 @@ use Livewire\Component;
 
 final class UserForm extends Component
 {
+    use AuthorizesMenuPermission;
+
+    private const PERMISSION_KEY = 'user-management.user';
+
     public ?string $userId = null;
 
     public string $name = '';
@@ -33,6 +38,7 @@ final class UserForm extends Component
 
     public function create(): void
     {
+        $this->authorizeMenuPermission(self::PERMISSION_KEY, 'create');
         $this->resetForm();
         $this->js("Flux.modal('user-form-modal').show()");
     }
@@ -40,6 +46,7 @@ final class UserForm extends Component
     #[On('user-edit')]
     public function edit(string $rowId): void
     {
+        $this->authorizeMenuPermission(self::PERMISSION_KEY, 'update');
         $user = User::findOrFail($rowId);
 
         $this->userId = $user->id;
@@ -56,6 +63,7 @@ final class UserForm extends Component
 
     public function save(): void
     {
+        $this->authorizeMenuPermission(self::PERMISSION_KEY, $this->userId ? 'update' : 'create');
         $validated = $this->validate();
         $attributes = [
             'name' => $validated['name'],
@@ -96,6 +104,7 @@ final class UserForm extends Component
     #[On('user-delete-request')]
     public function confirmDelete(string $rowId): void
     {
+        $this->authorizeMenuPermission(self::PERMISSION_KEY, 'delete');
         $user = User::findOrFail($rowId);
 
         $this->deletingId = $user->id;
@@ -105,6 +114,7 @@ final class UserForm extends Component
 
     public function delete(): void
     {
+        $this->authorizeMenuPermission(self::PERMISSION_KEY, 'delete');
         User::findOrFail($this->deletingId)->delete();
         $this->dispatch('user-updated');
         $this->deletingId = null;

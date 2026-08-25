@@ -2,12 +2,17 @@
 
 namespace App\Livewire;
 
+use App\Concerns\AuthorizesMenuPermission;
 use App\Models\Role;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 final class RoleForm extends Component
 {
+    use AuthorizesMenuPermission;
+
+    private const PERMISSION_KEY = 'user-management.role';
+
     public ?string $roleId = null;
 
     public string $name = '';
@@ -20,6 +25,7 @@ final class RoleForm extends Component
 
     public function create(): void
     {
+        $this->authorizeMenuPermission(self::PERMISSION_KEY, 'create');
         $this->resetForm();
         $this->js("Flux.modal('role-form-modal').show()");
     }
@@ -27,6 +33,7 @@ final class RoleForm extends Component
     #[On('role-edit')]
     public function edit(string $rowId): void
     {
+        $this->authorizeMenuPermission(self::PERMISSION_KEY, 'update');
         $role = Role::findOrFail($rowId);
 
         $this->roleId = $role->id;
@@ -38,6 +45,7 @@ final class RoleForm extends Component
 
     public function save(): void
     {
+        $this->authorizeMenuPermission(self::PERMISSION_KEY, $this->roleId ? 'update' : 'create');
         $validated = $this->validate();
         $attributes = [
             'name' => $validated['name'],
@@ -57,6 +65,7 @@ final class RoleForm extends Component
     #[On('role-delete-request')]
     public function confirmDelete(string $rowId): void
     {
+        $this->authorizeMenuPermission(self::PERMISSION_KEY, 'delete');
         $role = Role::findOrFail($rowId);
         $this->deletingId = $role->id;
         $this->deletingName = $role->name;
@@ -65,6 +74,7 @@ final class RoleForm extends Component
 
     public function delete(): void
     {
+        $this->authorizeMenuPermission(self::PERMISSION_KEY, 'delete');
         Role::findOrFail($this->deletingId)->delete();
         $this->dispatch('role-updated');
         $this->deletingId = null;
